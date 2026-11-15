@@ -127,11 +127,14 @@ details.note summary::after{content:" ▾";color:var(--muted)}
 .tile svg.anim{display:block;width:100%;height:auto;max-height:200px;cursor:pointer;margin:0 auto}
 .tile .fig{position:absolute;right:6px;top:6px;width:42px;opacity:.95;pointer-events:none}
 .tile .th{position:absolute;left:8px;bottom:5px;font-size:10.5px;font-weight:700;letter-spacing:.1em;text-transform:uppercase;color:var(--muted);pointer-events:none}
-svg.anim .nr,svg.anim .hl,svg.anim .far{fill:none;stroke-linecap:round;stroke-linejoin:round}
-svg.anim .nr{stroke:var(--ink);stroke-width:3.4} svg.anim .far{stroke:var(--ink);opacity:.4;stroke-width:3} svg.anim .hl{stroke:var(--accent);stroke-width:3.6} svg.anim .far.hl{opacity:.55}
-svg.anim .m2 .nr,svg.anim .m2 .far,svg.anim .m2 .hl{stroke-width:1.1;opacity:.5} svg.anim .hd{fill:var(--bg)}
+svg.anim .ol,svg.anim .bf{fill:none;stroke-linecap:round;stroke-linejoin:round}
+svg.anim .ol{stroke:var(--ink)} svg.anim .ol.fa{stroke:var(--muted)} svg.anim .ol2{fill:var(--ink)} svg.anim .ol2.fa{fill:var(--muted)}
+svg.anim .bf.fn{stroke:var(--surface)} svg.anim .bf.ff{stroke:var(--soft)} svg.anim .bf.hl{stroke:var(--accent)}
+svg.anim .bd{stroke:none} svg.anim .bd.fn{fill:var(--surface)} svg.anim .bd.ff{fill:var(--soft)} svg.anim .bd.hl{fill:var(--accent)}
+svg.anim .ar{stroke:var(--accent);stroke-width:2;fill:none;stroke-dasharray:3 2.5;stroke-linecap:round} svg.anim .ar2{stroke:var(--accent);stroke-width:2;fill:none;stroke-linecap:round;stroke-linejoin:round} svg.anim .gh{opacity:.16} svg.anim .lb{font:700 6.4px var(--f-body);fill:var(--muted);letter-spacing:.3px;text-transform:uppercase}
+svg.anim .hd2{fill:var(--surface);stroke:var(--ink);stroke-width:2}
 svg.anim .pr{stroke:var(--muted);stroke-width:2;fill:none;stroke-linecap:round} svg.anim .pr.thick{stroke-width:3.4} svg.anim .pr.hatch{stroke-width:1}
-svg.anim .fl{stroke:var(--muted);stroke-width:1.6;fill:none;stroke-linecap:round} svg.anim .dbl{stroke:var(--ink);stroke-width:2;stroke-linecap:round} svg.anim .dbp{fill:var(--ink)}
+svg.anim .fl{stroke:var(--muted);stroke-width:1.6;fill:none;stroke-linecap:round} svg.anim .dbl{stroke:var(--ink);stroke-width:2.4;stroke-linecap:round} svg.anim .dbp{fill:var(--ink)}
 .blk .ex:first-of-type{border-top:0;padding-top:0}
 .fig{width:62px;height:auto;display:block}
 .fig .sil{fill:var(--soft);stroke:var(--line);stroke-width:1}
@@ -669,25 +672,35 @@ function pose(def,time){
   const segs=seq.length-1,u=((time/def.dur)%1)*segs,i=Math.min(segs-1,Math.floor(u)),f=u-i,hold=def.cycle?0:.22,g=f<hold?0:ease((f-hold)/(1-hold));
   return mix(seq[i],seq[i+1],g)}
 const pth=pts=>'M'+pts.map(p=>p[0].toFixed(1)+' '+p[1].toFixed(1)).join('L');
-function draw(o,def,ghost){
-  const t=o.t,S=[o.P[0]+30*Math.sin(rad(t)),o.P[1]-30*Math.cos(rad(t))],hl=def.hl||[],c=g=>hl.indexOf(g)>=0?'hl':'nr',cf=g=>hl.indexOf(g)>=0?'hl far':'far';
+function draw(o,def){
+  const t=o.t,S=[o.P[0]+30*Math.sin(rad(t)),o.P[1]-30*Math.cos(rad(t))],hl=def.hl||[];
   const E=ik(S,o.W,15,14,o.eh),EF=ik(S,o.WF,15,14,o.ef),K=ik(o.P,o.A,22,22,o.kh),KF=ik(o.P,o.AF,22,22,o.kf);
   const toe=(e,fa)=>fa===null?null:[e[2]+7*dr(fa)[0],e[3]+7*dr(fa)[1]];
   const F=toe(K,o.fa),FF=toe(KF,o.faF);
   const dx=S[0]-o.P[0],dy=S[1]-o.P[1],L=Math.hypot(dx,dy)||1,mx=(S[0]+o.P[0])/2+dy/L*o.sb,my=(S[1]+o.P[1])/2-dx/L*o.sb;
-  const hv=[Math.sin(rad(t+o.hd)),-Math.cos(rad(t+o.hd))],H=[S[0]+hv[0]*11,S[1]+hv[1]*11];
-  let s=`<path class="${cf('legs')}" d="${pth([o.P,[KF[0],KF[1]],[KF[2],KF[3]]].concat(FF?[FF]:[]))}"/><path class="${cf('arms')}" d="${pth([S,[EF[0],EF[1]],[EF[2],EF[3]]])}"/>`;
-  s+=`<path class="${c('trunk')}" d="M${o.P[0].toFixed(1)} ${o.P[1].toFixed(1)}Q${mx.toFixed(1)} ${my.toFixed(1)} ${S[0].toFixed(1)} ${S[1].toFixed(1)}"/> <path class="${c('trunk')}" d="M${S[0].toFixed(1)} ${S[1].toFixed(1)}L${(S[0]+hv[0]*5).toFixed(1)} ${(S[1]+hv[1]*5).toFixed(1)}"/><circle class="${c('trunk')} hd" cx="${H[0].toFixed(1)}" cy="${H[1].toFixed(1)}" r="6.3"/>`;
-  s+=`<path class="${c('legs')}" d="${pth([o.P,[K[0],K[1]],[K[2],K[3]]].concat(F?[F]:[]))}"/><path class="${c('arms')}" d="${pth([S,[E[0],E[1]],[E[2],E[3]]])}"/>`;
-  if(def.db){const hands=def.db==='n'?[[E,E]]:[[E],[EF]];(def.db==='n'?[E]:[EF,E]).forEach(e=>{const ax=e[2]-e[0],ay=e[3]-e[1],l=Math.hypot(ax,ay)||1,ux=-ay/l*6,uy=ax/l*6;s+=`<path class="dbl" d="M${(e[2]-ux).toFixed(1)} ${(e[3]-uy).toFixed(1)}L${(e[2]+ux).toFixed(1)} ${(e[3]+uy).toFixed(1)}"/><circle class="dbp" cx="${(e[2]-ux).toFixed(1)}" cy="${(e[3]-uy).toFixed(1)}" r="3.4"/><circle class="dbp" cx="${(e[2]+ux).toFixed(1)}" cy="${(e[3]+uy).toFixed(1)}" r="3.4"/>`})}
+  const hv=[Math.sin(rad(t+o.hd)),-Math.cos(rad(t+o.hd))],H=[S[0]+hv[0]*12.5,S[1]+hv[1]*12.5];
+  const tone=(g,far)=>hl.indexOf(g)>=0?'hl':far?'ff':'fn';
+  const part=(d,w,g,far)=>{const tn=tone(g,far);return `<path class="ol${far?' fa':''}" d="${d}" style="stroke-width:${(w+3.4).toFixed(1)}"/><path class="bf ${tn}" d="${d}" style="stroke-width:${w}"/>`};
+  const dot=(p,r,g,far)=>{const tn=tone(g,far);return `<circle class="ol2${far?' fa':''}" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${r+1.7}"/><circle class="bd ${tn}" cx="${p[0].toFixed(1)}" cy="${p[1].toFixed(1)}" r="${r}"/>`};
+  const leg=(P,k,f,far)=>part(pth([P,[k[0],k[1]],[k[2],k[3]]]),9.5,'legs',far)+(f?part(pth([[k[2],k[3]],f]),6,'legs',far):''),arm=(e,far)=>part(pth([S,[e[0],e[1]],[e[2],e[3]]]),6.5,'arms',far)+dot([e[2],e[3]],3.6,'arms',far);
+  let s=leg(o.P,KF,FF,1)+arm(EF,1);
+  s+=part(`M${o.P[0].toFixed(1)} ${o.P[1].toFixed(1)}Q${mx.toFixed(1)} ${my.toFixed(1)} ${S[0].toFixed(1)} ${S[1].toFixed(1)}`,15,'trunk',0);
+  s+=part(`M${S[0].toFixed(1)} ${S[1].toFixed(1)}L${(S[0]+hv[0]*7).toFixed(1)} ${(S[1]+hv[1]*7).toFixed(1)}`,5.5,'trunk',0);
+  s+=`<circle class="hd2" cx="${H[0].toFixed(1)}" cy="${H[1].toFixed(1)}" r="7.2"/>`;
+  s+=leg(o.P,K,F,0)+arm(E,0);
+  if(def.db){(def.db==='n'?[E]:[EF,E]).forEach(e=>{const ax=e[2]-e[0],ay=e[3]-e[1],l=Math.hypot(ax,ay)||1,ux=-ay/l*6.5,uy=ax/l*6.5;s+=`<path class="dbl" d="M${(e[2]-ux).toFixed(1)} ${(e[3]-uy).toFixed(1)}L${(e[2]+ux).toFixed(1)} ${(e[3]+uy).toFixed(1)}"/><circle class="dbp" cx="${(e[2]-ux).toFixed(1)}" cy="${(e[3]-uy).toFixed(1)}" r="3.8"/><circle class="dbp" cx="${(e[2]+ux).toFixed(1)}" cy="${(e[3]+uy).toFixed(1)}" r="3.8"/>`})}
   return s}
 function props(def,o){let s='';(def.props||[]).forEach(p=>{
   if(p[0]==='b')s+=`<path class="pr" d="M${p[1]} ${p[3]}L${p[2]} ${p[3]}M${p[1]+5} ${p[3]}V${FLR}M${p[2]-5} ${p[3]}V${FLR}"/><path class="pr thick" d="M${p[1]} ${p[3]-1}L${p[2]} ${p[3]-1}"/>`;
   else if(p[0]==='w')s+=`<path class="pr" d="M${p[1]} 8V${FLR}"/><path class="pr hatch" d="M${p[1]} 18l7 -5M${p[1]} 34l7 -5M${p[1]} 50l7 -5M${p[1]} 66l7 -5M${p[1]} 82l7 -5M${p[1]} 98l7 -5"/>`;
   else if(p[0]==='l')s+=`<path class="pr" d="M${p[1]} ${p[2]}L${p[3]} ${p[4]}"/>`;
+  else if(p[0]==='a'){const an=Math.atan2(p[4]-p[2],p[3]-p[1]),h=d=>[p[3]-5*Math.cos(an+d),p[4]-5*Math.sin(an+d)],h1=h(.5),h2=h(-.5);s+=`<path class="ar" d="M${p[1]} ${p[2]}L${p[3]} ${p[4]}"/><path class="ar2" d="M${h1[0].toFixed(1)} ${h1[1].toFixed(1)}L${p[3]} ${p[4]}L${h2[0].toFixed(1)} ${h2[1].toFixed(1)}"/>`}
   else if(p[0]==='s')s+=`<path class="pr thick" d="M${(o.P[0]-9).toFixed(1)} ${(o.P[1]+6).toFixed(1)}L${(o.P[0]+9).toFixed(1)} ${(o.P[1]+6).toFixed(1)}"/>`});return s}
 const FLOOR='<path class="fl" d="M6 104.5q18 -2.2 36 0t36 .4t36 -.6t38 .4"/>';
-function frame(def,o){const b=draw(o,def);return FLOOR+props(def,o)+`<g class="m">${b}</g><g class="m2" transform="translate(.9 .8)">${b}</g>`}
+function frame(def,o){
+  if(!def.gh)def.gh=(!def.cycle&&def.nk.length>1)?`<g class="gh">${draw(def.nk[0],def)}${draw(def.nk[def.nk.length-1],def)}</g>`:'';
+  const lb=(def.lab||[])[Math.round(o.li||0)];
+  return FLOOR+props(def,o)+def.gh+`<g class="m">${draw(o,def)}</g>`+(lb?`<text class="lb" x="5" y="10">${lb}</text>`:'')}
 
 /* ---- definiciones: poses clave (vista lateral, mirando a la derecha) ---- */
 const AN={
@@ -699,7 +712,7 @@ const AN={
  cossack:{dur:4200,hl:['legs'],keys:[{P:[78,62],A:[96,AK],AF:[60,AK],a:35,e:95,fa:null},{P:[92,82],A:[96,AK],AF:[54,AK],a:35,e:95,fa:null}]},
  abd:{dur:3200,hl:['legs'],keys:[{P:[80,100],t:-90,A:[124,98],AF:[124,101],W:[56,92],WF:[50,100]},{P:[80,100],t:-90,A:[116,75],AF:[124,101],W:[56,92],WF:[50,100]}]},
  calf:{dur:3000,hl:['legs'],keys:[{P:[78,58],A:[78,AK],AF:[64,92],kf:[-1,.3],faF:60},{P:[78,53],A:[78,97],AF:[64,87],fa:40,kf:[-1,.3],faF:60}]},
- cope:{dur:3600,hl:['legs','trunk'],props:[['b',96,150,84]],keys:[{P:[70,95],t:-78,A:[104,82],AF:[112,101],kf:[0,1],kh:[0,-1],a:0,e:90,eh:[-1,1],WF:[74,90],fa:null},{P:[70,95],t:-78,A:[104,82],AF:[110,87],kf:[0,1],kh:[0,-1],a:0,e:90,eh:[-1,1],WF:[74,90],fa:null}]},
+ cope:{dur:3600,hl:['legs','trunk'],props:[['b',100,152,84],['a',111,100,111,91]],keys:[{P:[74,86],t:-90,A:[117,83.5],AF:[112,100],kf:[0,1],kh:[.2,-1],a:0,e:90,eh:[-1,1],WF:[74,79],fa:null},{P:[74,86],t:-90,A:[117,83.5],AF:[117,90],kf:[0,1],kh:[.2,-1],a:0,e:90,eh:[-1,1],WF:[74,79],fa:null}]},
  ktw:{dur:3600,hl:['legs'],props:[['w',121]],keys:[{P:[88,62],t:2,A:[100,AK],AF:[82,AK],W:[118,40]},{P:[104,66],t:2,A:[100,AK],AF:[82,AK],W:[118,40]}]},
  soleus:{dur:4200,hl:['legs'],props:[['w',122]],keys:[{P:[86,60],t:20,A:[72,AK],AF:[98,AK],W:[119,42]},{P:[86,66],t:22,A:[72,AK],AF:[98,AK],W:[119,44]}]},
  tibant:{dur:2800,hl:['legs'],props:[['w',54]],keys:[{P:[65,59],t:-6,A:[76,101.5],AF:[71,101.5],fa:90},{P:[65,59],t:-6,A:[76,101.5],AF:[71,101.5],fa:140}]},
@@ -721,15 +734,16 @@ const AN={
  revfly:{dur:3400,hl:['arms'],db:1,props:[['l',36,99,98,47],['l',44,92,44,104],['l',88,56,88,104]],keys:[{P:[54,84],t:50,A:[36,AK],AF:[31,AK]},{P:[54,84],t:50,A:[36,AK],AF:[31,AK],W:[50,55],WF:[48,55]}]},
  ytw:{dur:3600,hl:['arms'],db:1,props:[['b',44,110,74]],keys:[{P:[100,71],t:-90,A:[136,98],AF:[131,98]},{P:[100,71],t:-90,A:[136,98],AF:[131,98],W:[43,61],WF:[40,60]}]},
  birddog:{dur:4200,hl:['arms','legs'],keys:[{P:[58,76],t:82,A:[34,AK],AF:[30,AK],W:[88,102],WF:[86,102]},{P:[58,76],t:82,A:[34,AK],AF:[14,76],W:[117,70],WF:[86,102]}]},
- sideplank:{dur:3400,hl:['trunk'],keys:[{P:[72,100],t:-63,A:[116,AK],AF:[112,AK],a:0,e:90,eh:[-1,1],WF:[74,97],fa:null},{P:[73,92.5],t:-77,A:[116,AK],AF:[112,AK],a:0,e:90,eh:[-1,1],WF:[75,90],fa:null}]},
+ sideplank:{dur:3400,hl:['trunk'],props:[['a',73,80,73,66]],keys:[{P:[72,100],t:-63,A:[116,AK],AF:[112,AK],a:0,e:90,eh:[-1,1],WF:[74,97],fa:null},{P:[73,92.5],t:-77,A:[116,AK],AF:[112,AK],a:0,e:90,eh:[-1,1],WF:[75,90],fa:null}]},
  pullover:{dur:3800,hl:['arms'],db:'n',props:[['b',28,112,84]],keys:[{P:[96,80],t:-90,A:[116,AK],AF:[111,AK],W:[66,51],WF:[64,51]},{P:[96,80],t:-90,A:[116,AK],AF:[111,AK],W:[38,88],WF:[36,88]}]},
  scappu:{dur:3000,hl:['trunk'],props:[['b',108,150,84]],keys:[{P:[84.5,74.6],t:51.5,sb:-5,hd:12,A:[50,AK],AF:[46,AK],W:[112,82],WF:[110,82]},{P:[84.5,74.6],t:51.5,sb:6,hd:-8,A:[50,AK],AF:[46,AK],W:[112,82],WF:[110,82]}]},
  farmer:{dur:2600,hl:['arms'],db:1,keys:[{P:[78,58],A:[88,AK],AF:[66,AK]},{P:[78,58],A:[68,AK],AF:[88,AK]}]},
  deadbug:{dur:4000,hl:['arms','legs'],keys:[{P:[92,98],t:-90,A:[114,76],AF:[112,76],kh:[0,-1],kf:[0,-1],W:[62,69],WF:[60,69]},{P:[92,98],t:-90,A:[114,76],AF:[136,98],kh:[0,-1],kf:[0,-1],W:[34,97],WF:[60,69]}]},
  tspine:{dur:4200,hl:['trunk'],props:[['b',22,58,72]],keys:[{P:[84,96],t:-4,A:[120,100],AF:[116,100],kh:[0,-1],W:[74,52],eh:[1,-.5]},{P:[84,96],t:-38,hd:-12,A:[120,100],AF:[116,100],kh:[0,-1],W:[54,60],eh:[1,-.5]}]},
  breath:{dur:4600,hl:['trunk'],props:[['b',112,160,84]],keys:[{P:[88,97],t:-90,sb:0,A:[126,82],AF:[122,82],kh:[0,-1],a:80},{P:[88,97],t:-90,sb:-4,A:[126,82],AF:[122,82],kh:[0,-1],a:80}]}};
+const LAB={"goblet": ["1 · De pie", "2 · Baja con el pecho alto"], "dsq": ["1 · Talones elevados", "2 · Talones planos y baja"], "rdl": ["1 · De pie", "2 · Cadera atrás, espalda recta"], "split": ["1 · Arriba", "2 · Baja la rodilla trasera"], "bridge": ["1 · Cadera abajo", "2 · Sube y aprieta glúteos"], "cossack": ["1 · Piernas abiertas", "2 · Baja sobre una pierna"], "abd": ["1 · Piernas juntas", "2 · Sube la pierna de arriba"], "calf": ["1 · Talón apoyado", "2 · Sube sobre la punta"], "cope": ["1 · Pierna de abajo baja", "2 · Sube hasta el banco"], "ktw": ["1 · Pie lejos de la pared", "2 · Rodilla a la pared, talón abajo"], "soleus": ["1 · Rodilla recta", "2 · Dobla la rodilla, talón abajo"], "tibant": ["1 · Pie plano", "2 · Sube las puntas"], "ankcirc": ["1 · Neutro", "2 · Punta arriba", "3 · Neutro", "4 · Punta abajo"], "cars": ["1 · Rodilla al frente", "2 · Arriba", "3 · Atrás", "4 · Baja"], "h9090": ["1 · Rodillas a un lado", "2 · Cambia al otro lado"], "hflex": ["1 · Media rodilla", "2 · Adelanta la cadera"], "frog": ["1 · A cuatro apoyos", "2 · Siéntate hacia atrás"], "fig4": ["1 · Tobillo sobre rodilla", "2 · Tira del muslo al pecho"], "ham": ["1 · Pierna a 45°", "2 · Pierna más alta"], "rower": ["1 · Piernas encogidas", "2 · Estira y tira al pecho"], "openbook": ["1 · Brazos juntos", "2 · Abre hacia arriba", "3 · Abre del todo"], "plus": ["1 · Hombros hundidos", "2 · Empuja el suelo y redondea"], "wallfore": ["1 · Antebrazos abajo", "2 · Deslizan hacia arriba"], "wall": ["1 · Codos flexionados", "2 · Brazos arriba en V"], "csrow": ["1 · Brazos colgando", "2 · Codos atrás"], "oarow": ["1 · Brazo abajo", "2 · Codo a la cadera"], "hrow": ["1 · Brazos colgando", "2 · Tira hacia la cintura"], "revfly": ["1 · Brazos abajo", "2 · Abre y sube"], "ytw": ["1 · Brazos abajo", "2 · Eleva en Y"], "birddog": ["1 · A cuatro apoyos", "2 · Brazo y pierna contrarios"], "sideplank": ["1 · Cadera abajo", "2 · Sube la cadera"], "pullover": ["1 · Mancuerna arriba", "2 · Baja detrás de la cabeza"], "scappu": ["1 · Pecho hundido", "2 · Empuja y separa omóplatos"], "farmer": ["1 · Pie izquierdo", "2 · Pie derecho"], "deadbug": ["1 · Rodillas a 90°", "2 · Brazo y pierna opuestos"], "tspine": ["1 · Espalda recta", "2 · Extiende sobre el banco"], "breath": ["1 · Exhala", "2 · Inhala: sube el abdomen"]};Object.keys(LAB).forEach(k=>{AN[k].lab=LAB[k]});
 const ANID={oarowp:'oarow',rowend:'rower'};
-Object.values(AN).forEach(d=>{d.nk=d.keys.map(norm)});
+Object.values(AN).forEach(d=>{d.nk=d.keys.map((k,i)=>Object.assign(norm(k),{li:i}))});
 
 /* ---- controlador ---- */
 let ANIMS=[],ANIO=null;
