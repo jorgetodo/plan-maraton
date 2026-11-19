@@ -1,13 +1,13 @@
 {
-  "name": "Plan Maratón",
-  "short_name": "Maratón",
-  "description": "Plan de 52 semanas hacia el maratón",
+  "name": "TuttoFit",
+  "short_name": "TuttoFit",
+  "description": "Tu plan de entrenamiento: maratón, fuerza, movilidad y peso",
   "start_url": "./index.html",
   "scope": "./",
   "display": "standalone",
   "orientation": "portrait",
   "background_color": "#0A0A0A",
-  "theme_color": "#EA5129",
+  "theme_color": "#0A0A0A",
   "lang": "es",
   "icons": [
     {
